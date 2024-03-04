@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/weather")
 public class WeatherController {
 
-    CoordinateWeatherService coordinateWeatherService;
+    private final CoordinateWeatherService coordinateWeatherService;
 
     public WeatherController(CoordinateWeatherService coordinateWeatherService) {
         this.coordinateWeatherService = coordinateWeatherService;
