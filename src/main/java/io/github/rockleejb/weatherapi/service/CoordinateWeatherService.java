@@ -1,14 +1,12 @@
 package io.github.rockleejb.weatherapi.service;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import org.pmw.tinylog.Logger;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import io.github.cdimascio.dotenv.Dotenv;
-import reactor.core.publisher.Mono;
 
 
 @Service
