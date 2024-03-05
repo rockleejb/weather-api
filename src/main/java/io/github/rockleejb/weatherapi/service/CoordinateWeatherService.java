@@ -1,18 +1,15 @@
 package io.github.rockleejb.weatherapi.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.cdimascio.dotenv.Dotenv;
-import org.apache.coyote.BadRequestException;
 import org.pmw.tinylog.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.util.HashMap;
 import java.util.Map;
 
 
@@ -30,15 +27,15 @@ public class CoordinateWeatherService {
         owmApiKey = dotenv.get("OWM_API_KEY");
     }
 
-    public Map<String, Object> getWeatherByCoordinates(String latitude, String longitude) throws BadRequestException {
+    public Map<String, Object> getWeatherByCoordinates(String latitude, String longitude) {
         try {
             double convertedLatitude = Double.parseDouble(latitude);
             double convertedLongitude = Double.parseDouble(longitude);
             URI uri = UriComponentsBuilder.newInstance().scheme("https")
                     .host("api.openweathermap.org")
                     .path("data").path("/2.5").path("/weather")
-                    .queryParam("lat", latitude)
-                    .queryParam("lon", longitude)
+                    .queryParam("lat", convertedLatitude)
+                    .queryParam("lon", convertedLongitude)
                     .queryParam("appid", owmApiKey)
                     .build().toUri();
             Logger.info("Requesting weather at uri {} by coordinates: latitude {} longitude {}", uri, latitude, longitude);

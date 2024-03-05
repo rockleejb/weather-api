@@ -3,6 +3,7 @@ package io.github.rockleejb.weatherapi.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.github.rockleejb.weatherapi.service.CoordinateWeatherService;
 import org.apache.coyote.BadRequestException;
+import org.pmw.tinylog.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +26,11 @@ public class WeatherController {
 
     @GetMapping(value = "/{latitude}/{longitude}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Object>> getWeatherByLatitudeAndLongitude(@PathVariable("latitude") String latitude,
-                                                                                     @PathVariable("longitude") String longitude) throws BadRequestException, JsonProcessingException {
+                                                                                     @PathVariable("longitude") String longitude) {
             Map<String, Object> weatherDescription = coordinateWeatherService.getWeatherByCoordinates(latitude, longitude);
+            if (weatherDescription != null) {
+                Logger.info("Weather request succeeded");
+            }
             return new ResponseEntity<>(weatherDescription, HttpStatus.OK);
     }
 }
