@@ -19,7 +19,7 @@ public class WeatherController {
         this.coordinateWeatherService = coordinateWeatherService;
     }
 
-    @GetMapping(value = "/{latitude}/{longitude}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{latitude}/{longitude}")
     public ResponseEntity<Void> getWeatherByLatitudeAndLongitude(@PathVariable("latitude") String latitude,
                                                                  @PathVariable("longitude") String longitude) {
         try {
