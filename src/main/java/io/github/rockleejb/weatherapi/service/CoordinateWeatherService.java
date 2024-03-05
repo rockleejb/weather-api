@@ -32,8 +32,10 @@ public class CoordinateWeatherService {
         URI uri = UriComponentsBuilder.newInstance().scheme("https")
                 .host("api.openweathermap.org")
                 .path("data").path("/2.5").path("/weather")
-                .queryParam("lat", latitude).queryParam("lon", longitude)
-                .queryParam("appid", owmApiKey).build().toUri();
+                .queryParam("lat", latitude)
+                .queryParam("lon", longitude)
+                .queryParam("appid", owmApiKey)
+                .build().toUri();
         Logger.info("Requesting weather at uri {} by coordinates: latitude {} longitude {}", uri, latitude, longitude);
         String response = webClient.get()
                 .uri(uri)
