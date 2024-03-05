@@ -42,7 +42,6 @@ public class CoordinateWeatherService {
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
-        System.out.println(response);
         JsonNode jsonNode = objectMapper.readTree(response);
         return objectMapper.convertValue(jsonNode, new TypeReference<>() {});
     }
