@@ -38,7 +38,7 @@ class CoordinateWeatherServiceTest {
     }
 
     @Test
-    void getWeatherByCoordinates() throws IOException, InterruptedException {
+    void getWeatherByCoordinates_happyPath() throws IOException, InterruptedException {
 //        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("WeatherApiResponse.json");
 //        JsonNode jsonNode = objectMapper.readValue(in, JsonNode.class);
 //        mockBackEnd.enqueue(new MockResponse()
@@ -54,6 +54,11 @@ class CoordinateWeatherServiceTest {
 //                () -> assertEquals("Chicago", response.get("city")),
 //                () -> assertNull(response.get("id"))
 //        );
+    }
+
+    @Test
+    void getWeatherByCoordinates_failsWithInvalidParameters() {
+        
     }
 
     @Test
