@@ -1,0 +1,23 @@
+{
+  "city": "Chicago",
+  "coordinates": {
+    "lon": -87.6298,
+    "lat": 41.8781
+  },
+  "weather": [
+    {
+      "id": 801,
+      "main": "Clouds",
+      "description": "few clouds",
+      "icon": "02d"
+    }
+  ],
+  "main": {
+    "temp": 280.25,
+    "feels_like": 276.3,
+    "temp_min": 278.71,
+    "temp_max": 283.57,
+    "pressure": 1020,
+    "humidity": 75
+  }
+}
