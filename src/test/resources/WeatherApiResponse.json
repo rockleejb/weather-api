@@ -12,7 +12,7 @@
       "icon": "02d"
     }
   ],
-  "main": {
+  "details": {
     "temp": 280.25,
     "feels_like": 276.3,
     "temp_min": 278.71,

@@ -45,6 +45,7 @@ public class CoordinateWeatherService {
             JsonNode jsonNode = objectMapper.readTree(response);
             return transformResponse(objectMapper.convertValue(jsonNode, new TypeReference<>() {}));
         } catch (Exception e) {
+            Logger.error("getWeatherByCoordinates failed with exception {}", e);
             throw new RuntimeException("Invalid request");
         }
     }
@@ -53,7 +54,7 @@ public class CoordinateWeatherService {
         Map<String, Object> transformedResponse = new HashMap<>();
         transformedResponse.put("coordinates", owmResponse.get("coord"));
         transformedResponse.put("weather", owmResponse.get("weather"));
-        transformedResponse.put("main", owmResponse.get("main"));
+        transformedResponse.put("details", owmResponse.get("main"));
         transformedResponse.put("city", owmResponse.get("name"));
 
         return transformedResponse;

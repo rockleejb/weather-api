@@ -58,7 +58,7 @@ class CoordinateWeatherServiceTest {
 
     @Test
     void getWeatherByCoordinates_failsWithInvalidParameters() {
-        
+
     }
 
     @Test
@@ -70,7 +70,7 @@ class CoordinateWeatherServiceTest {
         assertAll(
                 () -> assertNotNull(transformedResponse.get("coordinates")),
                 () -> assertNotNull(transformedResponse.get("weather")),
-                () -> assertNotNull(transformedResponse.get("main")),
+                () -> assertNotNull(transformedResponse.get("details")),
                 () -> assertEquals("Chicago", transformedResponse.get("city")),
                 () -> assertNull(transformedResponse.get("id"))
         );
