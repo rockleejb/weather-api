@@ -10,6 +10,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -45,9 +46,18 @@ public class CoordinateWeatherService {
                     .bodyToMono(String.class)
                     .block();
             JsonNode jsonNode = objectMapper.readTree(response);
-            return objectMapper.convertValue(jsonNode, new TypeReference<>() {});
+            return transformResponse(objectMapper.convertValue(jsonNode, new TypeReference<>() {}));
         } catch (Exception e) {
-            throw new RuntimeException("Bad query parameters");
+            throw new RuntimeException("Invalid request");
         }
+    }
+
+    public Map<String, Object> transformResponse(Map<String, Object> owmResponse) {
+        Map<String, Object> transformedResponse = new HashMap<>();
+        transformedResponse.put("coordinates", owmResponse.get("coord"));
+        transformedResponse.put("weather", owmResponse.get("weather"));
+        transformedResponse.put("main", owmResponse.get("main"));
+        transformedResponse.put("city", owmResponse.get("name"));
+        return transformedResponse;
     }
 }
