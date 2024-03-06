@@ -7,9 +7,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 import org.pmw.tinylog.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,8 +19,8 @@ public class CoordinateWeatherService {
     private WebClient webClient;
     private ObjectMapper objectMapper;
 
-    public CoordinateWeatherService(WebClient webClient, ObjectMapper objectMapper) {
-        this.webClient = webClient;
+    public CoordinateWeatherService(String baseUrl, ObjectMapper objectMapper) {
+        this.webClient = WebClient.builder().baseUrl(baseUrl).build();
         this.objectMapper = objectMapper;
         Dotenv dotenv = Dotenv.load();
         owmApiKey = dotenv.get("OWM_API_KEY");
@@ -32,16 +30,15 @@ public class CoordinateWeatherService {
         try {
             double convertedLatitude = Double.parseDouble(latitude);
             double convertedLongitude = Double.parseDouble(longitude);
-            URI uri = UriComponentsBuilder.newInstance().scheme("https")
-                    .host("api.openweathermap.org")
-                    .path("data").path("/2.5").path("/weather")
-                    .queryParam("lat", convertedLatitude)
-                    .queryParam("lon", convertedLongitude)
-                    .queryParam("appid", owmApiKey)
-                    .build().toUri();
-            Logger.info("Requesting weather at uri {} by coordinates: latitude {} longitude {}", uri, latitude, longitude);
+            Logger.info("Requesting weather by coordinates: latitude {} longitude {}", latitude, longitude);
+
             String response = webClient.get()
-                    .uri(uri)
+                    .uri(uriBuilder ->
+                            uriBuilder
+                                    .queryParam("lat", convertedLatitude)
+                                    .queryParam("lon", convertedLongitude)
+                                    .queryParam("appid", owmApiKey)
+                                    .build())
                     .retrieve()
                     .bodyToMono(String.class)
                     .block();
@@ -58,6 +55,7 @@ public class CoordinateWeatherService {
         transformedResponse.put("weather", owmResponse.get("weather"));
         transformedResponse.put("main", owmResponse.get("main"));
         transformedResponse.put("city", owmResponse.get("name"));
+
         return transformedResponse;
     }
 }

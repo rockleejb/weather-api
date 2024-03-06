@@ -1,51 +1,56 @@
 package io.github.rockleejb.weatherapi.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import okhttp3.mockwebserver.MockWebServer;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
-import java.net.URI;
-import java.util.HashMap;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CoordinateWeatherServiceTest {
-    @InjectMocks
+    private static MockWebServer mockBackEnd;
     private CoordinateWeatherService coordinateWeatherService;
-    @Mock
-    private WebClient webClientMock;
-    @Mock
-    private WebClient.RequestHeadersUriSpec requestHeadersUriSpecMock;
-    @Mock
-    private WebClient.RequestHeadersSpec requestHeadersSpecMock;
-    @Mock
-    private WebClient.ResponseSpec responseSpecMock;
-    private String latitude = "12";
-    private String longitude = "23";
+    private ObjectMapper objectMapper;
+    @BeforeAll
+    static void setUp() throws IOException {
+        mockBackEnd = new MockWebServer();
+        mockBackEnd.start();
+    }
+
+    @BeforeEach
+    void initialize() {
+        String baseUrl = String.format("http://localhost:%s",
+                mockBackEnd.getPort());
+        coordinateWeatherService = new CoordinateWeatherService(baseUrl, objectMapper);
+    }
     @Test
-    void getWeatherByCoordinates() {
-        String response = new HashMap<String, Object>().toString();
-        when(webClientMock.get())
-                .thenReturn(requestHeadersUriSpecMock);
-        when(requestHeadersUriSpecMock.uri(any(URI.class)))
-                .thenReturn(requestHeadersSpecMock);
-        when(requestHeadersSpecMock.retrieve())
-                .thenReturn(responseSpecMock);
-        when(responseSpecMock.bodyToMono(String.class))
-                .thenReturn(Mono.just(response));
-        assertEquals(response,
-                coordinateWeatherService.getWeatherByCoordinates(latitude, longitude));
+    void transformResponse() throws IOException {
+        objectMapper = new ObjectMapper();
+        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("OwmResponse.json");
+        JsonNode jsonNode = objectMapper.readValue(in, JsonNode.class);
+        Map<String, Object> stringObjectMap = objectMapper.convertValue(jsonNode, new TypeReference<>() {});
+        Map<String, Object> transformedResponse = coordinateWeatherService.transformResponse(stringObjectMap);
+        assertAll(
+                () -> assertNotNull(transformedResponse.get("coordinates")),
+                () -> assertNotNull(transformedResponse.get("weather")),
+                () -> assertNotNull(transformedResponse.get("main")),
+                () -> assertEquals("Chicago", transformedResponse.get("city")),
+                () -> assertNull(transformedResponse.get("id"))
+        );
+    }
+    @AfterAll
+    static void tearDown() throws IOException {
+        mockBackEnd.shutdown();
     }
 }

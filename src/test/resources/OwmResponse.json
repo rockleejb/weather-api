@@ -1,0 +1,43 @@
+{
+  "coord": {
+    "lon": -87.6244,
+    "lat": 41.8756
+  },
+  "weather": [
+    {
+      "id": 802,
+      "main": "Clouds",
+      "description": "scattered clouds",
+      "icon": "03d"
+    }
+  ],
+  "base": "stations",
+  "main": {
+    "temp": 279.96,
+    "feels_like": 276.09,
+    "temp_min": 278.79,
+    "temp_max": 282.46,
+    "pressure": 1020,
+    "humidity": 77
+  },
+  "visibility": 10000,
+  "wind": {
+    "speed": 6.69,
+    "deg": 20
+  },
+  "clouds": {
+    "all": 40
+  },
+  "dt": 1709743340,
+  "sys": {
+    "type": 2,
+    "id": 2005153,
+    "country": "US",
+    "sunrise": 1709727404,
+    "sunset": 1709768809
+  },
+  "timezone": -21600,
+  "id": 4887398,
+  "name": "Chicago",
+  "cod": 200
+}

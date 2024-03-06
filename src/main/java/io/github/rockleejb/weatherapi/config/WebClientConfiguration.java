@@ -2,12 +2,11 @@ package io.github.rockleejb.weatherapi.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class WebClientConfiguration {
     @Bean
-    public WebClient webClient() {
-        return WebClient.builder().build();
+    public String baseUrl() {
+        return "https://api.openweathermap.org/data/2.5/weather";
     }
 }
