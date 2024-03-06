@@ -32,7 +32,7 @@ public class CoordinateWeatherService {
             double convertedLongitude = Double.parseDouble(longitude);
             Logger.info("Requesting weather by coordinates: latitude {} longitude {}", latitude, longitude);
 
-            String response = webClient.get()
+            JsonNode response = webClient.get()
                     .uri(uriBuilder ->
                             uriBuilder
                                     .queryParam("lat", convertedLatitude)
@@ -40,10 +40,9 @@ public class CoordinateWeatherService {
                                     .queryParam("appid", owmApiKey)
                                     .build())
                     .retrieve()
-                    .bodyToMono(String.class)
+                    .bodyToMono(JsonNode.class)
                     .block();
-            JsonNode jsonNode = objectMapper.readTree(response);
-            return transformResponse(objectMapper.convertValue(jsonNode, new TypeReference<>() {}));
+            return transformResponse(objectMapper.convertValue(response, new TypeReference<>() {}));
         } catch (Exception e) {
             Logger.error("getWeatherByCoordinates failed with exception {}", e);
             throw new RuntimeException("Invalid request");
