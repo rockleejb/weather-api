@@ -53,6 +53,8 @@ class CoordinateWeatherServiceTest {
     void getWeatherByCoordinates_failsWithInvalidParameter() {
         assertThrows(RuntimeException.class,
                 () -> coordinateWeatherService.getWeatherByCoordinates("abc", "14.3423"));
+        assertThrows(RuntimeException.class,
+                () -> coordinateWeatherService.getWeatherByCoordinates("3.2345", "foo"));
     }
     @Test
     void transformResponse() throws IOException {
