@@ -42,20 +42,20 @@ public class CoordinateWeatherService {
                     .retrieve()
                     .bodyToMono(JsonNode.class)
                     .block();
-            return transformResponse(objectMapper.convertValue(response, new TypeReference<>() {}));
+            return transformResponse(response);
         } catch (Exception e) {
             Logger.error("getWeatherByCoordinates failed with exception {}", e);
             throw new RuntimeException("Invalid request");
         }
     }
 
-    public Map<String, Object> transformResponse(Map<String, Object> owmResponse) {
+    public Map<String, Object> transformResponse(JsonNode owmResponse) {
+        Map<String, Object> originalResponse = objectMapper.convertValue(owmResponse, new TypeReference<>() {});
         Map<String, Object> transformedResponse = new HashMap<>();
-        transformedResponse.put("coordinates", owmResponse.get("coord"));
-        transformedResponse.put("weather", owmResponse.get("weather"));
-        transformedResponse.put("details", owmResponse.get("main"));
-        transformedResponse.put("city", owmResponse.get("name"));
-
+        transformedResponse.put("coordinates", originalResponse.get("coord"));
+        transformedResponse.put("weather", originalResponse.get("weather"));
+        transformedResponse.put("details", originalResponse.get("main"));
+        transformedResponse.put("city", originalResponse.get("name"));
         return transformedResponse;
     }
 }

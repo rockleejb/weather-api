@@ -1,11 +1,9 @@
 package io.github.rockleejb.weatherapi.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,44 +27,38 @@ class CoordinateWeatherServiceTest {
         mockBackEnd = new MockWebServer();
         mockBackEnd.start();
     }
-
     @BeforeEach
     void initialize() {
-        String baseUrl = String.format("http://localhost:%s",
-                mockBackEnd.getPort());
+        String baseUrl = "https://api.openweathermap.org/data/2.5/weather";
         coordinateWeatherService = new CoordinateWeatherService(baseUrl, objectMapper);
     }
-
     @Test
-    void getWeatherByCoordinates_happyPath() throws IOException, InterruptedException {
-//        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("WeatherApiResponse.json");
-//        JsonNode jsonNode = objectMapper.readValue(in, JsonNode.class);
-//        mockBackEnd.enqueue(new MockResponse()
-//                .setBody(objectMapper.writeValueAsString(jsonNode))
-//                .addHeader("Content-Type", "application/json"));
-//        RecordedRequest recordedRequest = mockBackEnd.takeRequest();
-//        Map<String, Object> response = coordinateWeatherService.getWeatherByCoordinates("41.8781", "-87.6298");
-//        assertAll(
-//                () -> assertEquals("GET", recordedRequest.getMethod()),
-//                () -> assertNotNull(response.get("coordinates")),
-//                () -> assertNotNull(response.get("weather")),
-//                () -> assertNotNull(response.get("main")),
-//                () -> assertEquals("Chicago", response.get("city")),
-//                () -> assertNull(response.get("id"))
-//        );
+    void getWeatherByCoordinates_happyPath() throws IOException {
+        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("WeatherApiResponse.json");
+        JsonNode jsonNode = objectMapper.readValue(in, JsonNode.class);
+        MockResponse mockResponse = new MockResponse()
+                .addHeader("Content-Type", "application/json; charset=utf-8")
+                .setBody(objectMapper.writeValueAsString(jsonNode));
+        mockBackEnd.enqueue(mockResponse);
+        Map<String, Object> weatherResponse = coordinateWeatherService.getWeatherByCoordinates("41.8781", "-87.6298");
+        assertAll(
+                () -> assertNotNull(weatherResponse.get("coordinates")),
+                () -> assertNotNull(weatherResponse.get("weather")),
+                () -> assertNotNull(weatherResponse.get("details")),
+                () -> assertEquals("Chicago", weatherResponse.get("city")),
+                () -> assertNull(weatherResponse.get("id"))
+        );
     }
-
     @Test
-    void getWeatherByCoordinates_failsWithInvalidParameters() {
-
+    void getWeatherByCoordinates_failsWithInvalidParameter() {
+        assertThrows(RuntimeException.class,
+                () -> coordinateWeatherService.getWeatherByCoordinates("abc", "14.3423"));
     }
-
     @Test
     void transformResponse() throws IOException {
         InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("OwmResponse.json");
         JsonNode jsonNode = objectMapper.readValue(in, JsonNode.class);
-        Map<String, Object> stringObjectMap = objectMapper.convertValue(jsonNode, new TypeReference<>() {});
-        Map<String, Object> transformedResponse = coordinateWeatherService.transformResponse(stringObjectMap);
+        Map<String, Object> transformedResponse = coordinateWeatherService.transformResponse(jsonNode);
         assertAll(
                 () -> assertNotNull(transformedResponse.get("coordinates")),
                 () -> assertNotNull(transformedResponse.get("weather")),
