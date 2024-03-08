@@ -19,8 +19,8 @@ public class CoordinateWeatherService {
     private WebClient webClient;
     private ObjectMapper objectMapper;
 
-    public CoordinateWeatherService(String baseUrl, ObjectMapper objectMapper) {
-        this.webClient = WebClient.builder().baseUrl(baseUrl).build();
+    public CoordinateWeatherService(WebClient webClient, ObjectMapper objectMapper) {
+        this.webClient = webClient;
         this.objectMapper = objectMapper;
         Dotenv dotenv = Dotenv.load();
         owmApiKey = dotenv.get("OWM_API_KEY");
@@ -45,7 +45,7 @@ public class CoordinateWeatherService {
             return transformResponse(response);
         } catch (Exception e) {
             Logger.error("getWeatherByCoordinates failed with exception {}", e);
-            throw new RuntimeException("Invalid request");
+            throw new RuntimeException(e);
         }
     }
 
