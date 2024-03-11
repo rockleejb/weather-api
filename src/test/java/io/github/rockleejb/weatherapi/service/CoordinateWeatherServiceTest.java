@@ -2,13 +2,22 @@ package io.github.rockleejb.weatherapi.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.net.URL;
 import java.util.Map;
 import java.util.Objects;
 
@@ -17,16 +26,34 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 class CoordinateWeatherServiceTest {
     private CoordinateWeatherService coordinateWeatherService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private WebClient webClient;
+    private ObjectMapper objectMapper = new ObjectMapper();
+    private String apiKey;
+    private static MockWebServer mockBackEnd;
 
+    @BeforeAll
+    static void setUp() throws IOException {
+        mockBackEnd = new MockWebServer();
+        mockBackEnd.start();
+    }
+    @BeforeEach
+    void init() throws NoSuchFieldException, IllegalAccessException {
+        webClient = WebClient.builder().baseUrl("https://api.openweathermap.org/data/2.5/weather").build();
+        coordinateWeatherService = new CoordinateWeatherService(webClient, objectMapper);
+        Field field = coordinateWeatherService.getClass().getDeclaredField("owmApiKey");
+        field.setAccessible(true);
+        apiKey = (String) field.get(coordinateWeatherService);
+    }
     @Test
     void getWeatherByCoordinates_happyPath() throws IOException {
+        String url = "https://api.openweathermap.org/data/2.5/weather?lat=41.8781&lon=-87.623177&appid=" + apiKey;
+        mockBackEnd.url(url);
         InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("WeatherApiResponse.json");
         byte[] jsonBytes = IOUtils.toByteArray(Objects.requireNonNull(in));
-//        MockResponse mockResponse = new MockResponse()
-//                .addHeader("Content-Type", "application/json; charset=utf-8")
-//                .setBody(new String(jsonBytes));
-//        mockBackEnd.enqueue(mockResponse);
+        MockResponse mockResponse = new MockResponse()
+                .addHeader("Content-Type", "application/json; charset=utf-8")
+                .setBody(new String(jsonBytes));
+        mockBackEnd.enqueue(mockResponse);
         Map<String, Object> weatherResponse = coordinateWeatherService.getWeatherByCoordinates("41.8781", "-87.6298");
         assertAll(
                 () -> assertNotNull(weatherResponse.get("coordinates")),
