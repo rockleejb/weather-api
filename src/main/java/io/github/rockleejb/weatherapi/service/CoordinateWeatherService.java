@@ -26,31 +26,27 @@ public class CoordinateWeatherService {
         owmApiKey = dotenv.get("OWM_API_KEY");
     }
 
-    public Map<String, Object> getWeatherByCoordinates(String latitude, String longitude) {
-        try {
-            double convertedLatitude = Double.parseDouble(latitude);
-            double convertedLongitude = Double.parseDouble(longitude);
-            Logger.info("Requesting weather by coordinates: latitude {} longitude {}", latitude, longitude);
+    public Map<String, Object> getWeatherByCoordinates(String latitude, String longitude) throws NumberFormatException {
+        double convertedLatitude = Double.parseDouble(latitude);
+        double convertedLongitude = Double.parseDouble(longitude);
+        Logger.info("Requesting weather by coordinates: latitude {} longitude {}", latitude, longitude);
 
-            JsonNode response = webClient.get()
-                    .uri(uriBuilder ->
-                            uriBuilder
-                                    .queryParam("lat", convertedLatitude)
-                                    .queryParam("lon", convertedLongitude)
-                                    .queryParam("appid", owmApiKey)
-                                    .build())
-                    .retrieve()
-                    .bodyToMono(JsonNode.class)
-                    .block();
-            return transformResponse(response);
-        } catch (Exception e) {
-            Logger.error("getWeatherByCoordinates failed with exception {}", e);
-            throw new RuntimeException(e);
-        }
+        JsonNode response = webClient.get()
+                .uri(uriBuilder ->
+                        uriBuilder
+                                .queryParam("lat", convertedLatitude)
+                                .queryParam("lon", convertedLongitude)
+                                .queryParam("appid", owmApiKey)
+                                .build())
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .block();
+        return transformResponse(response);
     }
 
     public Map<String, Object> transformResponse(JsonNode owmResponse) {
-        Map<String, Object> originalResponse = objectMapper.convertValue(owmResponse, new TypeReference<>() {});
+        Map<String, Object> originalResponse = objectMapper.convertValue(owmResponse, new TypeReference<>() {
+        });
         Map<String, Object> transformedResponse = new HashMap<>();
         transformedResponse.put("coordinates", originalResponse.get("coord"));
         transformedResponse.put("weather", originalResponse.get("weather"));

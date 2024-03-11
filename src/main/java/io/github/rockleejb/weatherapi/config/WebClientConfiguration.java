@@ -1,12 +1,17 @@
 package io.github.rockleejb.weatherapi.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class WebClientConfiguration {
+
+    @Value("${weather.api.baseUrl}")
+    private String baseUrl;
     @Bean
-    public String baseUrl() {
-        return "https://api.openweathermap.org/data/2.5/weather";
+    public WebClient webClient() {
+        return WebClient.builder().baseUrl(baseUrl).build();
     }
 }
