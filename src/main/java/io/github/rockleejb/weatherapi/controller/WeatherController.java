@@ -32,7 +32,7 @@ public class WeatherController {
             return new ResponseEntity<>(weatherDescription, HttpStatus.OK);
     }
 
-    @GetMapping(value =  "/{city}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value =  "/city/{city}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Object>> getWeatherByCity(@PathVariable("city") String city) throws FileNotFoundException, BadRequestException {
         Map<String, Object> weatherDescription = coordinateWeatherService.getWeatherByCityName(city);
         Logger.info("Weather request by city name succeeded");
