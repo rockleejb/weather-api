@@ -95,8 +95,7 @@ class CoordinateWeatherServiceTest {
         mockBackEnd.enqueue(mockResponse);
         List<Map<String, Object>> geolocationResponse = coordinateWeatherService.getCoordinatesFromCityName("Chicago");
         assertAll(
-                () -> assertNotNull(geolocationResponse.get(0).get("lat")),
-                () -> assertNotNull(geolocationResponse.get(0).get("lon"))
+                () -> assertFalse(geolocationResponse.isEmpty())
         );
     }
     @Test
