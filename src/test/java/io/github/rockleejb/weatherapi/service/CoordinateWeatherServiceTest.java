@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -98,5 +99,9 @@ class CoordinateWeatherServiceTest {
                 () -> assertNotNull(geolocationResponse.get(0).get("lat")),
                 () -> assertNotNull(geolocationResponse.get(0).get("lon"))
         );
+    }
+    @Test
+    void testGetCoordinatesFromCityName_invalidCityNameThrowsFileNotFoundException() {
+        assertThrows(FileNotFoundException.class, () -> coordinateWeatherService.getCoordinatesFromCityName("DarthVader"));
     }
 }

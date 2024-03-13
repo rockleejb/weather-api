@@ -73,7 +73,7 @@ public class CoordinateWeatherService {
                 .bodyToMono(JsonNode.class)
                 .block();
         List<Map<String, Object>> geolocationResponse = objectMapper.convertValue(response, new TypeReference<>() {});
-        if(geolocationResponse.get(0).get("lat") == null || geolocationResponse.get(0).get("lon") == null) {
+        if(geolocationResponse.isEmpty()) {
             throw new FileNotFoundException("No geolocation response found");
         }
         return geolocationResponse;
