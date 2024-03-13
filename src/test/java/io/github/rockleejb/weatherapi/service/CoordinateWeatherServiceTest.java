@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 class CoordinateWeatherServiceTest {
     private CoordinateWeatherService coordinateWeatherService;
-    private WebClient webClient;
     private ObjectMapper objectMapper = new ObjectMapper();
     private String apiKey;
     private static MockWebServer mockBackEnd;
