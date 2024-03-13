@@ -37,7 +37,6 @@ class CoordinateWeatherServiceTest {
     }
     @BeforeEach
     void init() throws NoSuchFieldException, IllegalAccessException {
-        webClient = WebClient.builder().baseUrl("https://api.openweathermap.org/data/2.5/weather").build();
         coordinateWeatherService = new CoordinateWeatherService(objectMapper);
         Field field = coordinateWeatherService.getClass().getDeclaredField("owmApiKey");
         field.setAccessible(true);
