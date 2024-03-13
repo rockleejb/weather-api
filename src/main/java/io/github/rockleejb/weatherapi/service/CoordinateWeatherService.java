@@ -80,7 +80,7 @@ public class CoordinateWeatherService {
                 .block();
         List<Map<String, Object>> geolocationResponse = objectMapper.convertValue(response, new TypeReference<>() {});
         if(geolocationResponse.isEmpty()) {
-            throw new FileNotFoundException("No geolocation response found");
+            throw new FileNotFoundException("No geolocation found");
         }
         return geolocationResponse;
     }
