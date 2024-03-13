@@ -8,7 +8,9 @@ import org.pmw.tinylog.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.io.FileNotFoundException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -16,11 +18,9 @@ import java.util.Map;
 public class CoordinateWeatherService {
 
     private String owmApiKey;
-    private WebClient webClient;
     private ObjectMapper objectMapper;
 
-    public CoordinateWeatherService(WebClient webClient, ObjectMapper objectMapper) {
-        this.webClient = webClient;
+    public CoordinateWeatherService(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         Dotenv dotenv = Dotenv.load();
         owmApiKey = dotenv.get("OWM_API_KEY");
@@ -30,7 +30,7 @@ public class CoordinateWeatherService {
         double convertedLatitude = Double.parseDouble(latitude);
         double convertedLongitude = Double.parseDouble(longitude);
         Logger.info("Requesting weather by coordinates: latitude {} longitude {}", latitude, longitude);
-
+        WebClient webClient = WebClient.builder().baseUrl("https://api.openweathermap.org/data/2.5/weather").build();
         JsonNode response = webClient.get()
                 .uri(uriBuilder ->
                         uriBuilder
@@ -45,13 +45,37 @@ public class CoordinateWeatherService {
     }
 
     public Map<String, Object> transformResponse(JsonNode owmResponse) {
-        Map<String, Object> originalResponse = objectMapper.convertValue(owmResponse, new TypeReference<>() {
-        });
+        Map<String, Object> originalResponse = objectMapper.convertValue(owmResponse, new TypeReference<>() {});
         Map<String, Object> transformedResponse = new HashMap<>();
         transformedResponse.put("coordinates", originalResponse.get("coord"));
         transformedResponse.put("weather", originalResponse.get("weather"));
         transformedResponse.put("details", originalResponse.get("main"));
         transformedResponse.put("city", originalResponse.get("name"));
         return transformedResponse;
+    }
+
+    public Map<String, Object> getWeatherByCityName(String city) throws FileNotFoundException {
+        List<Map<String, Object>> geolocationResponse = getCoordinatesFromCityName(city);
+        return getWeatherByCoordinates(String.valueOf(geolocationResponse.get(0).get("lat")),
+                String.valueOf(geolocationResponse.get(0).get("lon")));
+    }
+
+    public List<Map<String, Object>> getCoordinatesFromCityName(String city) throws FileNotFoundException {
+        Logger.info("Requesting coordinates by city name: {}", city);
+        WebClient webClient = WebClient.builder().baseUrl("http://api.openweathermap.org/geo/1.0/direct").build();
+        JsonNode response = webClient.get()
+                .uri(uriBuilder ->
+                        uriBuilder
+                                .queryParam("q", city)
+                                .queryParam("appid", owmApiKey)
+                                .build())
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .block();
+        List<Map<String, Object>> geolocationResponse = objectMapper.convertValue(response, new TypeReference<>() {});
+        if(geolocationResponse.get(0).get("lat") == null || geolocationResponse.get(0).get("lon") == null) {
+            throw new FileNotFoundException("No geolocation response found");
+        }
+        return geolocationResponse;
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.reactive.result.method.annotation.ResponseEntityExceptionHandler;
 
+import java.io.FileNotFoundException;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -21,6 +22,13 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
         Logger.error("NumberFormatException {} thrown for request {}", ex.getMessage(), request.getDescription(false));
         ErrorResponseDto errorResponseDto = new ErrorResponseDto("NumberFormatException", ex.getMessage(), HttpStatus.BAD_REQUEST, 400);
         return new ResponseEntity<>(convertErrorResponseDto(errorResponseDto), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = {FileNotFoundException.class})
+    public final ResponseEntity<Map<String, Object>> handleFileNotFoundException(Exception ex, WebRequest request) {
+        Logger.error("FileNotFoundException {} thrown for request {}", ex.getMessage(), request.getDescription(false));
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto("FileNotFoundException", ex.getMessage(), HttpStatus.NOT_FOUND, 404);
+        return new ResponseEntity<>(convertErrorResponseDto(errorResponseDto), HttpStatus.NOT_FOUND);
     }
 
     private Map<String, Object> convertErrorResponseDto(ErrorResponseDto errorResponseDto) {

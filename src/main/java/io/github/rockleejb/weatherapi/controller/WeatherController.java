@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.io.FileNotFoundException;
 import java.util.Map;
 
 @Controller
@@ -27,8 +28,17 @@ public class WeatherController {
                                                                                      @PathVariable("longitude") String longitude) {
             Map<String, Object> weatherDescription = coordinateWeatherService.getWeatherByCoordinates(latitude, longitude);
             if (weatherDescription != null) {
-                Logger.info("Weather request succeeded");
+                Logger.info("Weather request by coordinates succeeded");
             }
             return new ResponseEntity<>(weatherDescription, HttpStatus.OK);
+    }
+
+    @GetMapping(value =  "/{city}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Object>> getWeatherByCity(@PathVariable("city") String city) throws FileNotFoundException {
+        Map<String, Object> weatherDescription = coordinateWeatherService.getWeatherByCityName(city);
+        if (weatherDescription != null) {
+            Logger.info("Weather request by city name succeeded");
+        }
+        return new ResponseEntity<>(weatherDescription, HttpStatus.OK);
     }
 }

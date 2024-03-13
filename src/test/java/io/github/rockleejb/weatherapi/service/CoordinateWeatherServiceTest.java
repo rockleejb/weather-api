@@ -10,14 +10,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.net.URL;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -39,7 +37,7 @@ class CoordinateWeatherServiceTest {
     @BeforeEach
     void init() throws NoSuchFieldException, IllegalAccessException {
         webClient = WebClient.builder().baseUrl("https://api.openweathermap.org/data/2.5/weather").build();
-        coordinateWeatherService = new CoordinateWeatherService(webClient, objectMapper);
+        coordinateWeatherService = new CoordinateWeatherService(objectMapper);
         Field field = coordinateWeatherService.getClass().getDeclaredField("owmApiKey");
         field.setAccessible(true);
         apiKey = (String) field.get(coordinateWeatherService);
@@ -70,6 +68,7 @@ class CoordinateWeatherServiceTest {
         assertThrows(RuntimeException.class,
                 () -> coordinateWeatherService.getWeatherByCoordinates("3.2345", "foo"));
     }
+
     @Test
     void transformResponse() throws IOException {
         InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("OwmResponse.json");
@@ -81,6 +80,23 @@ class CoordinateWeatherServiceTest {
                 () -> assertNotNull(transformedResponse.get("details")),
                 () -> assertEquals("Chicago", transformedResponse.get("city")),
                 () -> assertNull(transformedResponse.get("id"))
+        );
+    }
+
+    @Test
+    void getCoordinatesFromCityName() throws IOException {
+        String url = "http://api.openweathermap.org/geo/1.0/direct?q=Chicago&limit=1&appid=" + apiKey;
+        mockBackEnd.url(url);
+        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("GeolocationResponse.json");
+        byte[] jsonBytes = IOUtils.toByteArray(Objects.requireNonNull(in));
+        MockResponse mockResponse = new MockResponse()
+                .addHeader("Content-Type", "application/json; charset=utf-8")
+                .setBody(new String(jsonBytes));
+        mockBackEnd.enqueue(mockResponse);
+        List<Map<String, Object>> geolocationResponse = coordinateWeatherService.getCoordinatesFromCityName("Chicago");
+        assertAll(
+                () -> assertNotNull(geolocationResponse.get(0).get("lat")),
+                () -> assertNotNull(geolocationResponse.get(0).get("lon"))
         );
     }
 }
