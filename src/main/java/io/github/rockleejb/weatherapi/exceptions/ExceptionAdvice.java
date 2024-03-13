@@ -2,6 +2,7 @@ package io.github.rockleejb.weatherapi.exceptions;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.coyote.BadRequestException;
 import org.pmw.tinylog.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,13 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
         Logger.error("FileNotFoundException {} thrown for request {}", ex.getMessage(), request.getDescription(false));
         ErrorResponseDto errorResponseDto = new ErrorResponseDto("FileNotFoundException", ex.getMessage(), HttpStatus.NOT_FOUND, 404);
         return new ResponseEntity<>(convertErrorResponseDto(errorResponseDto), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(value = {BadRequestException.class})
+    public final ResponseEntity<Map<String, Object>> handleBadRequestException(Exception ex, WebRequest request) {
+        Logger.error("BadRequestException {} thrown for request {}", ex.getMessage(), request.getDescription(false));
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto("BadRequestException", ex.getMessage(), HttpStatus.BAD_REQUEST, 400);
+        return new ResponseEntity<>(convertErrorResponseDto(errorResponseDto), HttpStatus.BAD_REQUEST);
     }
 
     private Map<String, Object> convertErrorResponseDto(ErrorResponseDto errorResponseDto) {

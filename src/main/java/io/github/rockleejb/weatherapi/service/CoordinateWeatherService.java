@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.cdimascio.dotenv.Dotenv;
+import org.apache.coyote.BadRequestException;
 import org.pmw.tinylog.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -26,9 +27,14 @@ public class CoordinateWeatherService {
         owmApiKey = dotenv.get("OWM_API_KEY");
     }
 
-    public Map<String, Object> getWeatherByCoordinates(String latitude, String longitude) throws NumberFormatException {
+    public Map<String, Object> getWeatherByCoordinates(String latitude, String longitude) throws NumberFormatException, BadRequestException {
         double convertedLatitude = Double.parseDouble(latitude);
         double convertedLongitude = Double.parseDouble(longitude);
+        if (convertedLatitude > 90.0 || convertedLatitude < -90.0 ||
+            convertedLongitude > 180.0 || convertedLongitude < -180.0) {
+            Logger.error("Invalid coordinates latitude: {} longitude {}", convertedLatitude, convertedLongitude);
+            throw new BadRequestException("Invalid coordinates");
+        }
         Logger.info("Requesting weather by coordinates: latitude {} longitude {}", latitude, longitude);
         WebClient webClient = WebClient.builder().baseUrl("https://api.openweathermap.org/data/2.5/weather").build();
         JsonNode response = webClient.get()
@@ -54,7 +60,7 @@ public class CoordinateWeatherService {
         return transformedResponse;
     }
 
-    public Map<String, Object> getWeatherByCityName(String city) throws FileNotFoundException {
+    public Map<String, Object> getWeatherByCityName(String city) throws FileNotFoundException, BadRequestException {
         List<Map<String, Object>> geolocationResponse = getCoordinatesFromCityName(city);
         return getWeatherByCoordinates(String.valueOf(geolocationResponse.get(0).get("lat")),
                 String.valueOf(geolocationResponse.get(0).get("lon")));
