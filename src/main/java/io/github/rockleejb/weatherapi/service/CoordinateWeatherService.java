@@ -8,7 +8,6 @@ import org.apache.coyote.BadRequestException;
 import org.pmw.tinylog.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.FileNotFoundException;
 import java.util.HashMap;
