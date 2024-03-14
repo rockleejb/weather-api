@@ -7,6 +7,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 import org.apache.coyote.BadRequestException;
 import org.pmw.tinylog.Logger;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.FileNotFoundException;
@@ -36,8 +37,8 @@ public class CoordinateWeatherService {
             throw new BadRequestException("Invalid coordinates");
         }
         Logger.info("Requesting weather by coordinates: latitude {} longitude {}", latitude, longitude);
-        WebClient webClient = WebClient.builder().baseUrl("https://api.openweathermap.org/data/2.5/weather").build();
-        JsonNode response = webClient.get()
+        RestClient restClient = RestClient.builder().baseUrl("https://api.openweathermap.org/data/2.5/weather").build();
+        JsonNode response = restClient.get()
                 .uri(uriBuilder ->
                         uriBuilder
                                 .queryParam("lat", convertedLatitude)
@@ -45,8 +46,7 @@ public class CoordinateWeatherService {
                                 .queryParam("appid", owmApiKey)
                                 .build())
                 .retrieve()
-                .bodyToMono(JsonNode.class)
-                .block();
+                .body(JsonNode.class);
         return transformResponse(response);
     }
 
@@ -68,16 +68,15 @@ public class CoordinateWeatherService {
 
     public List<Map<String, Object>> getCoordinatesFromCityName(String city) throws FileNotFoundException {
         Logger.info("Requesting coordinates by city name: {}", city);
-        WebClient webClient = WebClient.builder().baseUrl("http://api.openweathermap.org/geo/1.0/direct").build();
-        JsonNode response = webClient.get()
+        RestClient restClient = RestClient.builder().baseUrl("http://api.openweathermap.org/geo/1.0/direct").build();
+        JsonNode response = restClient.get()
                 .uri(uriBuilder ->
                         uriBuilder
                                 .queryParam("q", city)
                                 .queryParam("appid", owmApiKey)
                                 .build())
                 .retrieve()
-                .bodyToMono(JsonNode.class)
-                .block();
+                .body(JsonNode.class);
         List<Map<String, Object>> geolocationResponse = objectMapper.convertValue(response, new TypeReference<>() {});
         if(geolocationResponse.isEmpty()) {
             throw new FileNotFoundException("No geolocation found");
