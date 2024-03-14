@@ -17,7 +17,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class ExceptionAdvice extends ResponseEntityExceptionHandler {
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
     @ExceptionHandler(value = {NumberFormatException.class})
     public final ResponseEntity<Map<String, Object>> handleNumberFormatException(Exception ex, WebRequest request) {
         Logger.error("NumberFormatException {} thrown for request {}", ex.getMessage(), request.getDescription(false));
