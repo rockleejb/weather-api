@@ -21,26 +21,29 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {NumberFormatException.class})
     public final ResponseEntity<Map<String, Object>> handleNumberFormatException(Exception ex, WebRequest request) {
         Logger.error("NumberFormatException {} thrown for request {}", ex.getMessage(), request.getDescription(false));
-        ApiErrorResponseBuilder builder = new ApiErrorResponseBuilder("NumberFormatException")
-                .message(ex.getMessage()).httpStatus(HttpStatus.BAD_REQUEST).statusCode(400);
-        return new ResponseEntity<>(convertApiErrorResponse(builder.build()), HttpStatus.BAD_REQUEST);
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        ApiErrorResponse response = new ApiErrorResponseBuilder("NumberFormatException")
+                .message(ex.getMessage()).httpStatus(httpStatus).statusCode(400).build();
+        return new ResponseEntity<>(convertApiErrorResponse(response), httpStatus);
     }
 
     @ExceptionHandler(value = {FileNotFoundException.class})
     public final ResponseEntity<Map<String, Object>> handleFileNotFoundException(Exception ex, WebRequest request) {
         Logger.error("FileNotFoundException {} thrown for request {}", ex.getMessage(), request.getDescription(false));
-        ApiErrorResponseBuilder builder = new ApiErrorResponseBuilder("FileNotFoundException")
-                .message(ex.getMessage()).httpStatus(HttpStatus.NOT_FOUND).statusCode(404);
-        return new ResponseEntity<>(convertApiErrorResponse(builder.build()), HttpStatus.NOT_FOUND);
+        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+        ApiErrorResponse response = new ApiErrorResponseBuilder("FileNotFoundException")
+                .message(ex.getMessage()).httpStatus(httpStatus).statusCode(404).build();
+        return new ResponseEntity<>(convertApiErrorResponse(response), httpStatus);
 
     }
 
     @ExceptionHandler(value = {BadRequestException.class})
     public final ResponseEntity<Map<String, Object>> handleBadRequestException(Exception ex, WebRequest request) {
         Logger.error("BadRequestException {} thrown for request {}", ex.getMessage(), request.getDescription(false));
-        ApiErrorResponseBuilder builder = new ApiErrorResponseBuilder("BadRequestException")
-                .message(ex.getMessage()).httpStatus(HttpStatus.BAD_REQUEST).statusCode(400);
-        return new ResponseEntity<>(convertApiErrorResponse(builder.build()), HttpStatus.BAD_REQUEST);
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        ApiErrorResponse response = new ApiErrorResponseBuilder("BadRequestException")
+                .message(ex.getMessage()).httpStatus(httpStatus).statusCode(400).build();
+        return new ResponseEntity<>(convertApiErrorResponse(response), httpStatus);
     }
 
     private Map<String, Object> convertApiErrorResponse(ApiErrorResponse apiErrorResponse) {
