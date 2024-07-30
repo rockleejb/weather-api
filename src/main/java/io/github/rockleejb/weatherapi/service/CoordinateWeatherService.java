@@ -18,8 +18,8 @@ import java.util.Map;
 @Service
 public class CoordinateWeatherService {
 
-    private String owmApiKey;
-    private ObjectMapper objectMapper;
+    private final String owmApiKey;
+    private final ObjectMapper objectMapper;
 
     public CoordinateWeatherService(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
@@ -46,16 +46,19 @@ public class CoordinateWeatherService {
                                 .build())
                 .retrieve()
                 .body(JsonNode.class);
+        Logger.debug("Response: {}", response);
         return transformResponse(response);
     }
 
     public Map<String, Object> transformResponse(JsonNode owmResponse) {
+        Logger.debug("Transforming response: {}", owmResponse);
         Map<String, Object> originalResponse = objectMapper.convertValue(owmResponse, new TypeReference<>() {});
         Map<String, Object> transformedResponse = new HashMap<>();
         transformedResponse.put("coordinates", originalResponse.get("coord"));
         transformedResponse.put("weather", originalResponse.get("weather"));
         transformedResponse.put("details", originalResponse.get("main"));
         transformedResponse.put("city", originalResponse.get("name"));
+        Logger.debug("Transformed response: {}", transformedResponse);
         return transformedResponse;
     }
 
@@ -80,6 +83,7 @@ public class CoordinateWeatherService {
         if(geolocationResponse.isEmpty()) {
             throw new FileNotFoundException("No geolocation found");
         }
+        Logger.debug("Geolocation response: {}", geolocationResponse);
         return geolocationResponse;
     }
 }
