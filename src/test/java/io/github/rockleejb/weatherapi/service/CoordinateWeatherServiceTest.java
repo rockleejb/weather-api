@@ -71,16 +71,17 @@ class CoordinateWeatherServiceTest {
 
     @Test
     void transformResponse() throws IOException {
-        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("OwmResponse.json");
-        JsonNode jsonNode = objectMapper.readValue(in, JsonNode.class);
-        Map<String, Object> transformedResponse = coordinateWeatherService.transformResponse(jsonNode);
-        assertAll(
-                () -> assertNotNull(transformedResponse.get("coordinates")),
-                () -> assertNotNull(transformedResponse.get("weather")),
-                () -> assertNotNull(transformedResponse.get("details")),
-                () -> assertEquals("Chicago", transformedResponse.get("city")),
-                () -> assertNull(transformedResponse.get("id"))
-        );
+        try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("OwmResponse.json")) {
+            JsonNode jsonNode = objectMapper.readValue(in, JsonNode.class);
+            Map<String, Object> transformedResponse = coordinateWeatherService.transformResponse(jsonNode);
+            assertAll(
+                    () -> assertNotNull(transformedResponse.get("coordinates")),
+                    () -> assertNotNull(transformedResponse.get("weather")),
+                    () -> assertNotNull(transformedResponse.get("details")),
+                    () -> assertEquals("Chicago", transformedResponse.get("city")),
+                    () -> assertNull(transformedResponse.get("id"))
+            );
+        }
     }
 
     @Test
