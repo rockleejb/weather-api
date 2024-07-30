@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CoordinateWeatherServiceTest {
     private CoordinateWeatherService coordinateWeatherService;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private String apiKey;
     private static MockWebServer mockBackEnd;
 
@@ -30,6 +30,7 @@ class CoordinateWeatherServiceTest {
         mockBackEnd = new MockWebServer();
         mockBackEnd.start();
     }
+
     @BeforeEach
     void init() throws NoSuchFieldException, IllegalAccessException {
         coordinateWeatherService = new CoordinateWeatherService(objectMapper);
@@ -37,25 +38,29 @@ class CoordinateWeatherServiceTest {
         field.setAccessible(true);
         apiKey = (String) field.get(coordinateWeatherService);
     }
+
     @Test
     void getWeatherByCoordinates_happyPath() throws IOException {
         String url = "https://api.openweathermap.org/data/2.5/weather?lat=41.8781&lon=-87.623177&appid=" + apiKey;
         mockBackEnd.url(url);
-        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("WeatherApiResponse.json");
-        byte[] jsonBytes = IOUtils.toByteArray(Objects.requireNonNull(in));
-        MockResponse mockResponse = new MockResponse()
-                .addHeader("Content-Type", "application/json; charset=utf-8")
-                .setBody(new String(jsonBytes));
-        mockBackEnd.enqueue(mockResponse);
-        Map<String, Object> weatherResponse = coordinateWeatherService.getWeatherByCoordinates("41.8781", "-87.6298");
-        assertAll(
-                () -> assertNotNull(weatherResponse.get("coordinates")),
-                () -> assertNotNull(weatherResponse.get("weather")),
-                () -> assertNotNull(weatherResponse.get("details")),
-                () -> assertEquals("Chicago", weatherResponse.get("city")),
-                () -> assertNull(weatherResponse.get("id"))
-        );
+        byte[] jsonBytes;
+        try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("WeatherApiResponse.json")) {
+            jsonBytes = IOUtils.toByteArray(Objects.requireNonNull(in));
+            MockResponse mockResponse = new MockResponse()
+                    .addHeader("Content-Type", "application/json; charset=utf-8")
+                    .setBody(new String(jsonBytes));
+            mockBackEnd.enqueue(mockResponse);
+            Map<String, Object> weatherResponse = coordinateWeatherService.getWeatherByCoordinates("41.8781", "-87.6298");
+            assertAll(
+                    () -> assertNotNull(weatherResponse.get("coordinates")),
+                    () -> assertNotNull(weatherResponse.get("weather")),
+                    () -> assertNotNull(weatherResponse.get("details")),
+                    () -> assertEquals("Chicago", weatherResponse.get("city")),
+                    () -> assertNull(weatherResponse.get("id"))
+            );
+        }
     }
+
     @Test
     void getWeatherByCoordinates_failsWithInvalidParameter() {
         assertThrows(NumberFormatException.class,
@@ -82,17 +87,20 @@ class CoordinateWeatherServiceTest {
     void getCoordinatesFromCityName() throws IOException {
         String url = "http://api.openweathermap.org/geo/1.0/direct?q=Chicago&limit=1&appid=" + apiKey;
         mockBackEnd.url(url);
-        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("GeolocationResponse.json");
-        byte[] jsonBytes = IOUtils.toByteArray(Objects.requireNonNull(in));
-        MockResponse mockResponse = new MockResponse()
-                .addHeader("Content-Type", "application/json; charset=utf-8")
-                .setBody(new String(jsonBytes));
-        mockBackEnd.enqueue(mockResponse);
-        List<Map<String, Object>> geolocationResponse = coordinateWeatherService.getCoordinatesFromCityName("Chicago");
-        assertAll(
-                () -> assertFalse(geolocationResponse.isEmpty())
-        );
+        byte[] jsonBytes;
+        try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("GeolocationResponse.json")) {
+            jsonBytes = IOUtils.toByteArray(Objects.requireNonNull(in));
+            MockResponse mockResponse = new MockResponse()
+                    .addHeader("Content-Type", "application/json; charset=utf-8")
+                    .setBody(new String(jsonBytes));
+            mockBackEnd.enqueue(mockResponse);
+            List<Map<String, Object>> geolocationResponse = coordinateWeatherService.getCoordinatesFromCityName("Chicago");
+            assertAll(
+                    () -> assertFalse(geolocationResponse.isEmpty())
+            );
+        }
     }
+
     @Test
     void testGetCoordinatesFromCityName_invalidCityNameThrowsFileNotFoundException() {
         assertThrows(FileNotFoundException.class, () -> coordinateWeatherService.getCoordinatesFromCityName("DarthVader"));
